@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.taskadapter.redmineapi.RedmineManager;
+import com.taskadapter.redmineapi.RedmineManagerFactory;
+import com.taskadapter.redmineapi.internal.Transport;
+
+import redmineissuesoutput.domain.model.RedmineInfo;
 
 /**
  * メインのControllerクラス.
@@ -21,6 +26,9 @@ public class MainController {
 	@Autowired
 	HttpSession session;
 	
+	@Autowired
+	private RedmineInfo redmineInfo;
+	
 	@ModelAttribute
 	void setUpForm() {
 	}
@@ -32,6 +40,10 @@ public class MainController {
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	String moveSearchView() {
+		String url = redmineInfo.getUrl();
+		String apiKey = redmineInfo.getApiKey();
+		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+		Transport transport = redmineManager.getTransport();
 		return "redirect:/search";
 	}
 	
