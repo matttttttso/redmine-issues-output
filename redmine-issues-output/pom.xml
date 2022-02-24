@@ -105,6 +105,12 @@
 			<artifactId>datatables</artifactId>
 			<version>1.10.25</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.taskadapter/redmine-java-api -->
+		<dependency>
+			<groupId>com.taskadapter</groupId>
+			<artifactId>redmine-java-api</artifactId>
+			<version>4.0.0.rc4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
