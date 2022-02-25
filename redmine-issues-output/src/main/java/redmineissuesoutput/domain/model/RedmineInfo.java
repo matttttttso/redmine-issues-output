@@ -13,7 +13,7 @@ import lombok.Setter;
 @Configuration
 @PropertySource("classpath:/config/confidential.yml")
 @Component
-@ConfigurationProperties(prefix = "app.config.redmine")
+@ConfigurationProperties(prefix = "app.config.redmine-develop")
 public class RedmineInfo {
 	@Autowired
 	private Environment env;
