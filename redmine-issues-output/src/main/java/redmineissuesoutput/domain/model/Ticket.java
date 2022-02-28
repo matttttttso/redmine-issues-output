@@ -1,7 +1,10 @@
 package redmineissuesoutput.domain.model;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import com.taskadapter.redmineapi.bean.Issue;
 
@@ -18,32 +21,38 @@ import lombok.Setter;
 @Setter
 public class Ticket implements Serializable {
 	private String sequence;		//	番号
-	private String tracker;			//	区分				トラッカー			Issue.getTracker()
-	private String number;			//	管理番号			管理番号			CustomField.getCustomFieldByName("管理番号");
-	private String dept;			//	部門				部門				CustomField.getCustomFieldByName("部門");
-	private String accrualDate;		//	発生日			発生日			CustomField.getCustomFieldByName("発生日");
-	private String originator;		//	発信元担当者		発信元担当者		CustomField.getCustomFieldByName("発信元担当者");
+	private int id;					//	id
+	private String tracker;			//	区分				トラッカー			Issue.getTracker().getName()
+	private String number;			//	管理番号			管理番号			CustomField.getCustomFieldByName("管理番号").getValue()
+	private String dept;			//	部門				部門				CustomField.getCustomFieldByName("部門").getValue()
+	private String accrualDate;		//	発生日			発生日			CustomField.getCustomFieldByName("発生日").getValue()
+	private String originator;		//	発信元担当者		発信元担当者		CustomField.getCustomFieldByName("発信元担当者").getValue()
 	private String status;			//	状況				ステータス			Issue.getStatusName()
 	private String agenda;			//	検討課題			説明				Issue.getDescription()
 	private String assigneeName;	//	検討者（主）		担当者			Issue.getAssigneeName()
-	private String subAssigneeName;	//	検討者（副）		副担当者			CustomField.getCustomFieldByName("副担当者")
-	private String result;			//	検討案または結果	検討案または結果	CustomField.getCustomFieldByName("検討案または結果");
-	private Date dueDate;			//	期限				期日				Issue.getDueDate();
-	private String completionDate;	//	回答または完了日	完了日			CustomField.getCustomFieldByName("完了日");
+	private String subAssigneeName;	//	検討者（副）		副担当者			CustomField.getCustomFieldByName("副担当者").getValue()
+	private String result;			//	検討案または結果	検討案または結果	CustomField.getCustomFieldByName("検討案または結果").getValue()
+	private String dueDate;			//	期限				期日				Issue.getDueDate()
+	private String completionDate;	//	回答または完了日	完了日			CustomField.getCustomFieldByName("完了日").getValue()
 	
 	public Ticket(Issue issue, int sec) {
 		this.sequence = String.valueOf(sec);
+		this.id = issue.getId();
 		this.tracker = issue.getTracker().getName();
 		this.number = issue.getCustomFieldByName("管理番号").getValue();
 		this.dept = issue.getCustomFieldByName("部門").getValue();
-		this.accrualDate = issue.getCustomFieldByName("発生日").getValue();
+		this.accrualDate = LocalDate
+				.parse(issue.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+				.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 		this.originator = issue.getCustomFieldByName("発信元担当者").getValue();
 		this.status = issue.getStatusName();
 		this.agenda = issue.getDescription();
 		this.assigneeName = issue.getAssigneeName();
 		this.subAssigneeName = issue.getCustomFieldByName("副担当者").getValue();
 		this.result = issue.getCustomFieldByName("検討案または結果").getValue();
-		this.dueDate = issue.getDueDate();
+		if (Objects.nonNull(issue.getDueDate())) {
+			this.dueDate = new SimpleDateFormat("yyyy/MM/dd").format(issue.getDueDate());
+		}
 		this.completionDate = issue.getCustomFieldByName("完了日").getValue();
 	}
 }
