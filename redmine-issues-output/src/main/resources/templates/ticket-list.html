@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<title th:text="プロジェクト一覧"></title>
+	<link th:rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css} " />
+</head>
+<body>
+	<div>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>番号</th>
+					<th>区分</th>
+					<th>管理番号</th>
+					<th>部門</th>
+					<th>発生日</th>
+					<th>発信元<br/>担当者</th>
+					<th>状況</th>
+					<th>検討課題</th>
+					<th>担当者</th>
+					<th>副担当者</th>
+					<th>検討案<br/>または結果</th>
+					<th>期日</th>
+					<th>完了日</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="ticket : ${ticketList}">
+					<td class="py-0" th:text="${ticket.sequence}"></td>
+					<td class="py-0" th:text="${ticket.tracker}"></td>
+					<td class="py-0" th:text="${ticket.number}"></td>
+					<td class="py-0" th:text="${ticket.dept}"></td>
+					<td class="py-0" th:text="${ticket.accrualDate}"></td>
+					<td class="py-0" th:text="${ticket.originator}"></td>
+					<td class="py-0" th:text="${ticket.status}"></td>
+					<td class="py-0" th:text="${ticket.agenda}"></td>
+					<td class="py-0" th:text="${ticket.assigneeName}"></td>
+					<td class="py-0" th:text="${ticket.subAssigneeName}"></td>
+					<td class="py-0" th:text="${ticket.result}"></td>
+					<td class="py-0" th:text="${ticket.dueDate}"></td>
+					<td class="py-0" th:text="${ticket.completionDate}"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
