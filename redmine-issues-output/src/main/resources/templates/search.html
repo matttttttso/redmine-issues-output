@@ -2,9 +2,70 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8" />
-	<title th:text="がん患者検索-条件入力"></title>
+	<title th:text="プロジェクト一覧"></title>
+	<link th:rel="stylesheet" th:href="@{/webjars/bootstrap-datepicker/css/bootstrap-datepicker3.css}" />
+	<link th:rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css} " />
 </head>
 <body>
-	<h1>test</h1>
+	<div class="container">
+		<!-- 期間 -->
+		<form id="mainForm" th:object="${searchForm}" th:action="@{/ticket}" name="searchForm" method="post">
+			<label class="form-group mb-2 d-flex flex-column" for="startDate">
+				<div class="d-flex justify-content-between align-items-center">
+					<h5 class="font-weight-bold m-0 col-4 pl-0">期間</h5>
+					<div class="col-8 p-0 d-flex align-items-center">
+						<div class="input-group">
+							<label class="m-0 input-group-prepend" for="startDate">
+								<div class="input-group-text p-1">
+									<span class="small">開始日</span>
+								</div>
+							</label>
+							<input type="text" id="startDate" class="border border-primary form-control form-control-sm datepicker" th:field="*{startDate}" placeholder="YYYY/MM/DD" />
+						</div>
+						<div class="px-2">&#65374;</div>
+						<div class="input-group">
+							<label class="m-0 input-group-prepend" for="endDate">
+								<div class="input-group-text p-1">
+									<span class="small">終了日</span>
+								</div>
+							</label>
+							<input type="text" id="endDate" class="border border-primary form-control form-control-sm datepicker" th:field="*{endDate}" placeholder="YYYY/MM/DD" />
+						</div>
+					</div>
+				</div>
+				<!-- 期間 エラー文 -->
+				<span id="startDateSpringError" class="alert alert-danger mb-0" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}">startDateのエラーメッセージ<br></span>
+				<span id="startDateEmptyJSError" class="alert alert-danger mb-0" style="display: none;">開始日：必須項目です<br></span>
+				<span id="startDateRegexError" class="alert alert-danger mb-0" style="display: none;">開始日：日付形式「YYYY/MM/DD」で入力してください<br></span>
+				<span id="endDateSpringError" class="alert alert-danger mb-0" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}">endDateのエラーメッセージ<br></span>
+				<span id="endDateEmptyJSError" class="alert alert-danger mb-0" style="display: none;">終了日：必須項目です<br></span>
+				<span id="endDateRegexError" class="alert alert-danger mb-0" style="display: none;">終了日：日付形式「YYYY/MM/DD」で入力してください<br></span>
+				<span class="alert alert-danger mb-0" th:if="${#fields.hasErrors('dateValid')}" th:errors="*{dateValid}">dateValidのエラーメッセージ<br></span>
+				<span id="dateOrderError" class="alert alert-danger mb-0" style="display: none;">終了日は開始日よりも後の日付を入力してください。<br></span>
+			</label>
+		</form>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>親プロジェクト</th>
+					<th>検討課題(プロジェクト名が ~_検討課題)</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="pp : ${parentProjectList}">
+					<td class="py-0" th:text="${pp.name}">
+					</td>
+					<td th:each="cp : ${childProjectList}" th:if="${pp.id == cp.parentId}" class="py-0">
+							<button id="showTicketList" class="btn btn-primary  btn-sm" type="submit" form="mainForm"
+									name="identifier" th:value="${cp.identifier}" th:text="${cp.name}"></button>
+					</td >
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+	<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+	<script th:src="@{/webjars/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+	<script th:src="@{/webjars/bootstrap-datepicker/locales/bootstrap-datepicker.ja.min.js}"></script>
 </body>
 </html>
