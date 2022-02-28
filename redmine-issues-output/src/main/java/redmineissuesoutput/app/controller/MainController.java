@@ -1,13 +1,11 @@
 package redmineissuesoutput.app.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
@@ -17,15 +15,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.RedmineManagerFactory;
-import com.taskadapter.redmineapi.bean.CustomField;
 import com.taskadapter.redmineapi.bean.Issue;
 import com.taskadapter.redmineapi.bean.Project;
-import com.taskadapter.redmineapi.internal.Transport;
 
+import redmineissuesoutput.app.form.SearchForm;
 import redmineissuesoutput.domain.model.RedmineInfo;
 import redmineissuesoutput.domain.model.Ticket;
 
@@ -44,7 +42,13 @@ public class MainController {
 	private RedmineInfo redmineInfo;
 	
 	@ModelAttribute
-	void setUpForm() {
+	SearchForm setUpForm() {
+		SearchForm searchForm = new SearchForm();
+		// デフォルト値設定
+		LocalDate initialStartDate = LocalDate.of(LocalDate.now().minusYears(1).getYear(), 1, 1);	// 1年前の1月1日をセット
+		searchForm.setStartDate(initialStartDate);
+		searchForm.setEndDate(LocalDate.of(initialStartDate.getYear(), 12, 31));					// 1年前の12月31日をセット
+		return searchForm;
 	}
 	
 	/**
@@ -53,47 +57,7 @@ public class MainController {
 	 * @return リダイレクト(/search)
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	String moveSearchView() {
-		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
-		List<Project> projectList = new ArrayList<>();
-		Project aki = null;
-		Project akiKadai = null;
-		List<Issue> akiTicketList = new ArrayList<>();
-//		List<Issue> akiKadaiTicketList = new ArrayList<>();
-//		Issue akiIssue0 = new Issue();
-//		Collection<CustomField> customField = new HashSet<>();
-//		List<Object> list = new ArrayList<>();
-//		CustomField customFieldfuku = new CustomField();
-		try {
-			projectList = redmineManager.getProjectManager().getProjects();
-			projectList.get(0).getParentId();
-			aki = projectList.get(7);
-//			aki = projectList.get(13);
-			akiTicketList = redmineManager.getIssueManager().getIssues(aki.getIdentifier(), null);
-//			akiIssue0 = akiTicketList.get(0);
-//			customField = akiIssue0.getCustomFields();
-//			customFieldfuku = akiIssue0.getCustomFieldByName("副担当者");
-//			customFieldfuku = akiIssue0.getCustomFieldByName("部門");
-//			customFieldfuku = akiIssue0.getCustomFieldByName("管理番号");
-//			customFieldfuku = akiIssue0.getCustomFieldByName("発生日");
-//			customFieldfuku = akiIssue0.getCustomFieldByName("検討案または結果");
-//			customFieldfuku = akiIssue0.getCustomFieldByName("完了日");
-//			customFieldfuku = akiIssue0.getCustomFieldByName("発信元担当者");
-//			list = Arrays.asList(customField.toArray());;
-//			akiIssue0.getDueDate();
-//			akiKadai = projectList.get(14);
-//			akiKadaiTicketList = redmineManager.getIssueManager().getIssues(akiKadai.getIdentifier(), akiKadai.getId());
-		} catch (RedmineException e) {
-			e.printStackTrace();
-//			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, e);
-		}
-		Transport transport = redmineManager.getTransport();
-		List<Ticket> ticketList = new ArrayList<>();
-		int index = 0;
-		for (Issue issue : akiTicketList) {
-			ticketList.add(new Ticket(issue, index++));
-		}
-		
+	String moveSearchView(Model model) {
 		return "redirect:/search";
 	}
 	
@@ -106,7 +70,54 @@ public class MainController {
 	 */
 	@RequestMapping(value = "search", method = RequestMethod.GET)
 	String showSearchView(Model model) {
+		
+		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+		List<Project> projectList = new ArrayList<>();
+		List<Project> parentProjectList = new ArrayList<>();
+		List<Project> childProjectList = new ArrayList<>();
+		try {
+			projectList = redmineManager.getProjectManager().getProjects();
+			parentProjectList = projectList.stream()
+					.filter(p -> Objects.isNull(p.getParentId()))
+					.collect(Collectors.toList());
+			childProjectList = projectList.stream()
+					.filter(p -> Objects.nonNull(p.getParentId()))
+					.filter(p -> Objects.equals(p.getName().substring(p.getName().length() - 5), "_検討課題"))
+					.collect(Collectors.toList());
+		} catch (RedmineException e) {
+			e.printStackTrace();
+		}
+		// 出力画面用にセット
+		model.addAttribute("parentProjectList", parentProjectList);
+		model.addAttribute("childProjectList", childProjectList);
+		
 		return "search";
+	}
+	
+	@RequestMapping(value = "ticket", method = RequestMethod.POST)
+	String showTicketList(Model model, @RequestParam("identifier")String identifier, SearchForm searchForm) throws RedmineException {
+		model.addAttribute("identifier", identifier);
+		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+		List<Issue> allIssueList = new ArrayList<>();
+		try {
+			allIssueList = redmineManager.getIssueManager().getIssues(identifier, null);
+		} catch (RedmineException e) {
+			e.printStackTrace();
+		}
+		List<Issue> filteredIssueList = allIssueList.stream()
+				.filter(i -> searchForm.getStartDate().minusDays(1)
+								.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
+				.filter(i -> searchForm.getEndDate().plusDays(1)
+								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
+				.collect(Collectors.toList());
+		List<Ticket> ticketList = new ArrayList<>();
+		int index = 1;
+		for (Issue issue : filteredIssueList) {
+			ticketList.add(new Ticket(issue, index++));
+		}
+		model.addAttribute("ticketList", ticketList);
+		
+		return "ticket-list";
 	}
 
 }
