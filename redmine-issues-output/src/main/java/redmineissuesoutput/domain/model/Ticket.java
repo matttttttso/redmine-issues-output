@@ -20,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Ticket implements Serializable {
-	private String sequence;		//	番号
+	private int sequence;		//	番号
 	private int id;					//	id
 	private String tracker;			//	区分				トラッカー			Issue.getTracker().getName()
 	private String number;			//	管理番号			管理番号			CustomField.getCustomFieldByName("管理番号").getValue()
@@ -36,7 +36,7 @@ public class Ticket implements Serializable {
 	private String completionDate;	//	回答または完了日	完了日			CustomField.getCustomFieldByName("完了日").getValue()
 	
 	public Ticket(Issue issue, int sec) {
-		this.sequence = String.valueOf(sec);
+		this.sequence = sec;
 		this.id = issue.getId();
 		this.tracker = issue.getTracker().getName();
 		this.number = issue.getCustomFieldByName("管理番号").getValue();
