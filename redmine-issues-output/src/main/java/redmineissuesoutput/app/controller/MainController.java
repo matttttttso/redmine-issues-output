@@ -1,7 +1,6 @@
 package redmineissuesoutput.app.controller;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,17 +14,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.RedmineManagerFactory;
-import com.taskadapter.redmineapi.bean.Issue;
 import com.taskadapter.redmineapi.bean.Project;
 
 import redmineissuesoutput.app.form.SearchForm;
 import redmineissuesoutput.domain.model.RedmineInfo;
-import redmineissuesoutput.domain.model.Ticket;
 
 /**
  * メインのControllerクラス.
@@ -40,6 +36,9 @@ public class MainController {
 	
 	@Autowired
 	private RedmineInfo redmineInfo;
+	
+//	@Autowired
+//	private ApplicationContext context;
 	
 	@ModelAttribute
 	SearchForm setUpForm() {
@@ -94,30 +93,48 @@ public class MainController {
 		return "search";
 	}
 	
-	@RequestMapping(value = "ticket", method = RequestMethod.POST)
-	String showTicketList(Model model, @RequestParam("identifier")String identifier, SearchForm searchForm) throws RedmineException {
-		model.addAttribute("identifier", identifier);
-		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
-		List<Issue> allIssueList = new ArrayList<>();
-		try {
-			allIssueList = redmineManager.getIssueManager().getIssues(identifier, null);
-		} catch (RedmineException e) {
-			e.printStackTrace();
-		}
-		List<Issue> filteredIssueList = allIssueList.stream()
-				.filter(i -> searchForm.getStartDate().minusDays(1)
-								.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
-				.filter(i -> searchForm.getEndDate().plusDays(1)
-								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
-				.collect(Collectors.toList());
-		List<Ticket> ticketList = new ArrayList<>();
-		int index = 1;
-		for (Issue issue : filteredIssueList) {
-			ticketList.add(new Ticket(issue, index++));
-		}
-		model.addAttribute("ticketList", ticketList);
-		
-		return "ticket-list";
-	}
+//	@RequestMapping(value = "ticket", method = RequestMethod.POST)
+//	String showTicketList(Model model, @RequestParam("identifier")String identifier, SearchForm searchForm, HttpServletResponse response) throws RedmineException {
+//		model.addAttribute("identifier", identifier);
+//		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+//		List<Issue> allIssueList = new ArrayList<>();
+//		try {
+//			allIssueList = redmineManager.getIssueManager().getIssues(identifier, null);
+//		} catch (RedmineException e) {
+//			e.printStackTrace();
+//		}
+//		List<Issue> filteredIssueList = allIssueList.stream()
+//				.filter(i -> searchForm.getStartDate().minusDays(1)
+//								.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
+//				.filter(i -> searchForm.getEndDate().plusDays(1)
+//								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
+//				.collect(Collectors.toList());
+//		List<Ticket> ticketList = new ArrayList<>();
+//		int index = 1;
+//		for (Issue issue : filteredIssueList) {
+//			ticketList.add(new Ticket(issue, index++));
+//		}
+//		model.addAttribute("ticketList", ticketList);
+//		
+//		
+//		try {
+//		      //テンプレート読み込み
+//		      Resource resource = context.getResource("classpath:jasperreports/sample.jrxml");
+//		      InputStream in = resource.getInputStream();
+//		      JasperReport report = JasperCompileManager.compileReport(in);
+//		      //パラメーター、データソースの設定
+//		      Map<String, Object> params = new HashMap<>();
+//		      JRDataSource dataSource = new JREmptyDataSource();
+//		      //PDFを作成し、レスポンスボディに設定
+//		      JasperPrint print = JasperFillManager.fillReport(report, params, dataSource);
+//		      response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+//		      JasperExportManager.exportReportToPdfStream(print, response.getOutputStream());
+//		    } catch (IOException | JRException e) {
+//		      //エラー処理
+//		      e.printStackTrace();
+//		    }
+//		
+//		return "ticket-list";
+//	}
 
 }
