@@ -60,7 +60,7 @@
 						</td>
 						<td th:each="cp : ${childProjectList}" th:if="${pp.id == cp.parentId}" class="p-0">
 								<button id="showTicketList" class="btn btn-primary  btn-sm" type="submit" form="mainForm"
-										name="identifier" th:value="${cp.identifier}" th:text="${cp.name}"></button>
+										name="projectIdAndParentName" th:value="|${cp.id},${pp.name}|" th:text="${cp.name}"></button>
 						</td >
 					</tr>
 				</tbody>
