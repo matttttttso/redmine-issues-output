@@ -9,12 +9,13 @@
 <body>
 	<div class="container d-flex justify-content-between">
 		<!-- 期間 -->
-		<div class="p-3">
+		<div class="p-3 bg-light">
 			<form id="mainForm" th:object="${searchForm}" th:action="@{/ticket}" name="searchForm" method="post">
+				<h5 class="font-weight-bold m-0">検索期間</h5>
 				<label class="form-group mb-2 d-flex flex-column" for="startDate">
 					<div class="d-flex justify-content-between align-items-center">
-						<h5 class="font-weight-bold m-0 col-3 pl-0">期間</h5>
-						<div class="col-9 p-0 d-flex align-items-center">
+						<div class="col-2"></div>
+						<div class="col-10 p-0 d-flex align-items-center">
 							<div class="input-group">
 								<label class="m-0 input-group-prepend" for="startDate">
 									<div class="input-group-text p-1">
@@ -45,26 +46,28 @@
 					<span id="dateOrderError" class="alert alert-danger mb-0" style="display: none;">終了日は開始日よりも後の日付を入力してください。<br></span>
 				</label>
 			</form>
-		</div>
-		<div class="p-3">
+			<h5 class="font-weight-bold mt-3">プロジェクト一覧</h5>
 			<table class="table table-bordered">
 				<thead>
 					<tr>
-						<th style="width: 300px;">親プロジェクト</th>
-						<th style="width: 300px;">検討課題<br/>(プロジェクト名が ~_検討課題)</th>
+						<th class="py-0 align-middle border border-dark" style="width: 300px;">親プロジェクト</th>
+						<th class="py-0 align-middle border border-dark" style="width: 300px;">検討課題<br/>(プロジェクト名が ~_検討課題)</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody class="border border-dark">
 					<tr th:each="pp : ${parentProjectList}">
-						<td class="py-1" th:text="${pp.name}">
+						<td class="py-1 align-middle border border-dark" th:text="${pp.name}">
 						</td>
-						<td th:each="cp : ${childProjectList}" th:if="${pp.id == cp.parentId}" class="p-0">
-								<button id="showTicketList" class="btn btn-primary  btn-sm" type="submit" form="mainForm"
-										name="projectIdAndParentName" th:value="|${cp.id},${pp.name}|" th:text="${cp.name}"></button>
+						<td th:each="cp : ${childProjectList}" th:if="${pp.id == cp.parentId}" class="p-0 align-middle border border-dark">
+								<button id="showTicketList" class="btn btn-outline-primary py-1" type="submit" form="mainForm"
+										name="projectIdAndParentName" th:value="|${cp.id},${pp.name}|" th:text="${cp.name}"
+										style="width: 100%;"></button>
 						</td >
 					</tr>
 				</tbody>
 			</table>
+		</div>
+		<div >
 		</div>
 	</div>
 	<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
