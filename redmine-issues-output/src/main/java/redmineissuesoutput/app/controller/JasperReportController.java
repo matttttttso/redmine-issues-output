@@ -1,6 +1,7 @@
 package redmineissuesoutput.app.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,14 +43,17 @@ import redmineissuesoutput.domain.model.Ticket;
 public class JasperReportController {
 	
 	@Autowired
+	private ApplicationContext context;
+	
+	@Autowired
 	private RedmineInfo redmineInfo;
 
-	@RequestMapping(value = "ticket", method = RequestMethod.POST)
+	@RequestMapping(value = "output", method = RequestMethod.POST)
 	public void showTicketList(Model model, @RequestParam("projectIdAndParentName") String projectIdAndParentName,
 			SearchForm searchForm, HttpServletResponse response) throws RedmineException {
 		String[] params = projectIdAndParentName.split(",");
 		String projectId = params[0];
-		String parentName = params[1].replaceAll("[0-9]+.", "") + "\t殿";
+		String customerName = params[1].replaceAll("[0-9]+.", "") + "\t殿";
 		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
 		final String TICKET_LIMIT = "100";
 		int page = 1;
@@ -95,17 +100,17 @@ public class JasperReportController {
 		}
 		// PDF出力処理
 		try {
-			//テンプレート読み込み
-			String jasperFilePath =  getClass().getResource("/jasperreports/jasper-template.jasper").getPath();
-			//パラメーター、データソースの設定
+			// コンパイル済みテンプレート読み込み
+			InputStream stream = context.getResource("classpath:jasperreports/jasper-template.jasper").getInputStream();
+			// パラメーター、データソースの設定
 			HashMap<String, Object> parameterMap = new HashMap<String, Object>();
 			parameterMap.put("datasource1", ticketList);
-			parameterMap.put("customerName", parentName);
+			parameterMap.put("customerName", customerName);
 			parameterMap.put("outputDate", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")));
-			//PDFを作成し、レスポンスボディに設定
-			JasperPrint jasperPrint= JasperFillManager.fillReport(jasperFilePath, parameterMap, new JREmptyDataSource());
+			// PDFを作成し、レスポンスボディに設定
+			JasperPrint print = JasperFillManager.fillReport(stream, parameterMap, new JREmptyDataSource());
 			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-			JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
+			JasperExportManager.exportReportToPdfStream(print, response.getOutputStream());
 		} catch (IOException | JRException e) {
 			//エラー処理
 			e.printStackTrace();
