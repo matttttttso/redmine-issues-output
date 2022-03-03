@@ -93,48 +93,67 @@ public class MainController {
 		return "search";
 	}
 	
-//	@RequestMapping(value = "ticket", method = RequestMethod.POST)
-//	String showTicketList(Model model, @RequestParam("identifier")String identifier, SearchForm searchForm, HttpServletResponse response) throws RedmineException {
-//		model.addAttribute("identifier", identifier);
+//	/**
+//	 * 検索画面、検索結果リスト返却、Ajax通信用
+//	 * 
+//	 * @param searchForm : SearchForm
+//	 * @return issueList : List<Ticket>
+//	 */
+//	@RequestMapping(value = "*/get-issue-list", method = RequestMethod.POST)
+//	@ResponseBody
+//	public List<Ticket> returnStageCodeList(@RequestBody SearchForm searchForm) {
+//		String projectId = searchForm.getProjectId();
 //		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+//		final String TICKET_LIMIT = "100";
+//		int page = 1;
+//		Map<String,String> paramsMap = new HashMap<String,String>();
+//		paramsMap.put("limit", TICKET_LIMIT);
+//		paramsMap.put("page", String.valueOf(page));
+//		paramsMap.put("status_id", "*");	// チケットのステータス：全て
+//		paramsMap.put("project_id", projectId);
 //		List<Issue> allIssueList = new ArrayList<>();
+//		// APIでチケットを取得
 //		try {
-//			allIssueList = redmineManager.getIssueManager().getIssues(identifier, null);
+//			ResultsWrapper<Issue> rw = redmineManager.getIssueManager().getIssues(paramsMap);
+//			allIssueList.addAll(rw.getResults());
+//			boolean issuesRemaining = true;
+//			while (issuesRemaining) {
+//				if (rw.getResults().size() < Integer.valueOf(TICKET_LIMIT)) {
+//					issuesRemaining = false;
+//				} else {
+//					page++;
+//					paramsMap.put("page",String.valueOf(page));
+//					rw = redmineManager.getIssueManager().getIssues(paramsMap);
+//					allIssueList.addAll(rw.getResults());
+//				}
+//			}
 //		} catch (RedmineException e) {
 //			e.printStackTrace();
 //		}
+//		// チケットをフィルタリング
 //		List<Issue> filteredIssueList = allIssueList.stream()
+//				.filter(i -> !i.getCustomFieldByName("発生日").getValue().isEmpty())
 //				.filter(i -> searchForm.getStartDate().minusDays(1)
-//								.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
+//								.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
 //				.filter(i -> searchForm.getEndDate().plusDays(1)
-//								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-M-d"))))
+//								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+//				.sorted(Comparator.comparing((Issue i) -> i.getCustomFieldByName("発生日").getValue())
+//								.thenComparing((Issue i) -> Integer.valueOf(i.getCustomFieldByName("管理番号").getValue())))
 //				.collect(Collectors.toList());
+//		// ユーザー一覧を取得
+//		List<User> userList = new ArrayList<>();
+//		try {
+//			userList = redmineManager.getUserManager().getUsers();
+//		} catch (RedmineException e) {
+//			e.printStackTrace();
+//		}
+//		// 必要情報のみ取り出す
 //		List<Ticket> ticketList = new ArrayList<>();
 //		int index = 1;
 //		for (Issue issue : filteredIssueList) {
-//			ticketList.add(new Ticket(issue, index++));
+//			ticketList.add(new Ticket(issue, index++, userList));
 //		}
-//		model.addAttribute("ticketList", ticketList);
 //		
-//		
-//		try {
-//		      //テンプレート読み込み
-//		      Resource resource = context.getResource("classpath:jasperreports/sample.jrxml");
-//		      InputStream in = resource.getInputStream();
-//		      JasperReport report = JasperCompileManager.compileReport(in);
-//		      //パラメーター、データソースの設定
-//		      Map<String, Object> params = new HashMap<>();
-//		      JRDataSource dataSource = new JREmptyDataSource();
-//		      //PDFを作成し、レスポンスボディに設定
-//		      JasperPrint print = JasperFillManager.fillReport(report, params, dataSource);
-//		      response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-//		      JasperExportManager.exportReportToPdfStream(print, response.getOutputStream());
-//		    } catch (IOException | JRException e) {
-//		      //エラー処理
-//		      e.printStackTrace();
-//		    }
-//		
-//		return "ticket-list";
+//		return ticketList;
 //	}
-
 }
