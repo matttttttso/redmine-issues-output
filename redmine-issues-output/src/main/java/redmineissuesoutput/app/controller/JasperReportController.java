@@ -50,11 +50,12 @@ public class JasperReportController {
 
 	@RequestMapping(value = "output", method = RequestMethod.POST)
 	public void showTicketList(Model model, @RequestParam("projectIdAndParentName") String projectIdAndParentName,
-			SearchForm searchForm, HttpServletResponse response) throws RedmineException {
+			SearchForm searchForm, HttpServletResponse response) {
+		// リクエストパラメータ加工
 		String[] params = projectIdAndParentName.split(",");
 		String projectId = params[0];
 		String customerName = params[1].replaceAll("[0-9]+.", "") + "\t殿";
-		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+		// チケット取得用のパラメータ準備
 		final String TICKET_LIMIT = "100";
 		int page = 1;
 		Map<String,String> paramsMap = new HashMap<String,String>();
@@ -62,9 +63,12 @@ public class JasperReportController {
 		paramsMap.put("page", String.valueOf(page));
 		paramsMap.put("status_id", "*");	// チケットのステータス：全て
 		paramsMap.put("project_id", projectId);
+		// APIでチケットとユーザーのリストを取得
 		List<Issue> allIssueList = new ArrayList<>();
-		// APIでチケットを取得
+		List<User> userList = new ArrayList<>();
+		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
 		try {
+			// チケットリスト
 			ResultsWrapper<Issue> rw = redmineManager.getIssueManager().getIssues(paramsMap);
 			allIssueList.addAll(rw.getResults());
 			boolean issuesRemaining = true;
@@ -78,6 +82,8 @@ public class JasperReportController {
 					allIssueList.addAll(rw.getResults());
 				}
 			}
+			// ユーザーリスト
+			userList = redmineManager.getUserManager().getUsers();
 		} catch (RedmineException e) {
 			e.printStackTrace();
 		}
@@ -92,7 +98,6 @@ public class JasperReportController {
 								.thenComparing((Issue i) -> Integer.valueOf(i.getCustomFieldByName("管理番号").getValue())))
 				.collect(Collectors.toList());
 		// 必要情報のみ取り出す
-		List<User> userList = redmineManager.getUserManager().getUsers();
 		List<Ticket> ticketList = new ArrayList<>();
 		int index = 1;
 		for (Issue issue : filteredIssueList) {
