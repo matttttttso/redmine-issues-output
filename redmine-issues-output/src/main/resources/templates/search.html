@@ -7,10 +7,10 @@
 	<link th:rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css} " />
 </head>
 <body>
-	<div class="container d-flex justify-content-between">
+	<div class="container d-flex justify-content-center">
 		<!-- 期間 -->
 		<div class="p-3 bg-light">
-			<form id="mainForm" th:object="${searchForm}" th:action="@{/ticket}" name="searchForm" method="post">
+			<form id="mainForm" th:object="${searchForm}" th:action="@{/output}" name="searchForm" method="post">
 				<h5 class="font-weight-bold m-0">検索期間</h5>
 				<label class="form-group mb-2 d-flex flex-column" for="startDate">
 					<div class="d-flex justify-content-between align-items-center">
@@ -45,13 +45,35 @@
 					<span class="alert alert-danger mb-0" th:if="${#fields.hasErrors('dateValid')}" th:errors="*{dateValid}">dateValidのエラーメッセージ<br></span>
 					<span id="dateOrderError" class="alert alert-danger mb-0" style="display: none;">終了日は開始日よりも後の日付を入力してください。<br></span>
 				</label>
+<!--/*-->
+				<!-- プロジェクトID -->
+				<h5 class="font-weight-bold m-0">プロジェクトID</h5>
+				<label class="form-group mb-2 d-flex flex-column" for="projectId">
+					<div class="d-flex justify-content-between align-items-center">
+						<div class="col-2"></div>
+						<input type="text" id="projectId" class="col-10 border border-primary form-control form-control-sm" th:field="*{projectId}" placeholder="入力してください"/>
+					</div>
+					<!-- プロジェクトID エラー文 -->
+					<span id="projectIdSpringError" class="alert alert-danger mb-0" th:if="${#fields.hasErrors('projectId')}" th:errors="*{projectId}">projectIdのエラーメッセージ<br></span>
+				</label>
+				<!-- 顧客名 -->
+				<h5 class="font-weight-bold m-0">顧客名</h5>
+				<label class="form-group mb-2 d-flex flex-column" for="customerName">
+					<div class="d-flex justify-content-between align-items-center">
+						<div class="col-2"></div>
+						<input type="text" id="customerName" class="col-10 border border-primary form-control form-control-sm" th:field="*{customerName}" placeholder="入力してください"/>
+					</div>
+					<!-- 顧客名 エラー文 -->
+					<span id="customerNameSpringError" class="alert alert-danger mb-0" th:if="${#fields.hasErrors('customerName')}" th:errors="*{customerName}">customerNameのエラーメッセージ<br></span>
+				</label>
+<!--*/-->
 			</form>
 			<h5 class="font-weight-bold mt-3">プロジェクト一覧</h5>
 			<table class="table table-bordered">
-				<thead>
+				<thead class="thead-dark text-center">
 					<tr>
-						<th class="py-0 align-middle border border-dark" style="width: 300px;">親プロジェクト</th>
-						<th class="py-0 align-middle border border-dark" style="width: 300px;">検討課題<br/>(プロジェクト名が ~_検討課題)</th>
+						<th class="py-0 align-middle">親プロジェクト</th>
+						<th class="py-0 align-middle">検討課題<br/>(プロジェクト名が ~_検討課題)</th>
 					</tr>
 				</thead>
 				<tbody class="border border-dark">
@@ -59,16 +81,18 @@
 						<td class="py-1 align-middle border border-dark" th:text="${pp.name}">
 						</td>
 						<td th:each="cp : ${childProjectList}" th:if="${pp.id == cp.parentId}" class="p-0 align-middle border border-dark">
-								<button id="showTicketList" class="btn btn-outline-primary py-1" type="submit" form="mainForm"
-										name="projectIdAndParentName" th:value="|${cp.id},${pp.name}|" th:text="${cp.name}"
-										style="width: 100%;"></button>
+							<button style="width: 100%;" type="submit" form="mainForm"
+									class="btn btn-outline-primary py-1" name="projectIdAndParentName"
+									th:value="|${cp.id},${pp.name}|" th:text="${cp.name}"></button>
 						</td >
 					</tr>
 				</tbody>
 			</table>
 		</div>
+<!--/*-->
 		<div >
 		</div>
+<!--*/-->
 	</div>
 	<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
 	<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
