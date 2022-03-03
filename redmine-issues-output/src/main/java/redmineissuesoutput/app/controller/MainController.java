@@ -69,11 +69,11 @@ public class MainController {
 	 */
 	@RequestMapping(value = "search", method = RequestMethod.GET)
 	String showSearchView(Model model) {
-		
-		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
+		// プロジェクト一覧を取得
 		List<Project> projectList = new ArrayList<>();
 		List<Project> parentProjectList = new ArrayList<>();
 		List<Project> childProjectList = new ArrayList<>();
+		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
 		try {
 			projectList = redmineManager.getProjectManager().getProjects();
 			parentProjectList = projectList.stream()
