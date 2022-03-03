@@ -39,4 +39,10 @@ public class SearchForm implements Serializable {
 		}
 		return endDate.isAfter(startDate);
 	}
+	
+//	@NotNull(message = "プロジェクトID：必須項目です")
+//	public String projectId;					// プロジェクトID
+//	
+//	@NotNull(message = "顧客名：必須項目です")
+//	public String customerName;					// 顧客名
 }
