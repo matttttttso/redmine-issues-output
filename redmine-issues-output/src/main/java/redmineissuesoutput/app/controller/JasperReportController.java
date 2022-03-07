@@ -95,7 +95,9 @@ public class JasperReportController {
 				.filter(i -> searchForm.getEndDate().plusDays(1)
 								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
 				.sorted(Comparator.comparing((Issue i) -> i.getCustomFieldByName("発生日").getValue())
-								.thenComparing((Issue i) -> Integer.valueOf(i.getCustomFieldByName("管理番号").getValue())))
+						.thenComparing((Issue i) -> i.getCustomFieldByName("管理番号").getValue().isBlank() ? null
+								: Integer.valueOf(i.getCustomFieldByName("管理番号").getValue()),
+						Comparator.nullsLast(Comparator.naturalOrder())))
 				.collect(Collectors.toList());
 		// 必要情報のみ取り出す
 		List<Ticket> ticketList = new ArrayList<>();
