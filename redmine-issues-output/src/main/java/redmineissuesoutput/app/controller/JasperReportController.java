@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
@@ -95,7 +96,9 @@ public class JasperReportController {
 				.filter(i -> searchForm.getEndDate().plusDays(1)
 								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
 				.sorted(Comparator.comparing((Issue i) -> i.getCustomFieldByName("発生日").getValue())
-								.thenComparing((Issue i) -> Integer.valueOf(i.getCustomFieldByName("管理番号").getValue())))
+						.thenComparing((Issue i) -> StringUtils.isBlank(i.getCustomFieldByName("管理番号").getValue()) ? null
+								: Integer.valueOf(i.getCustomFieldByName("管理番号").getValue()),
+						Comparator.nullsLast(Comparator.naturalOrder())))
 				.collect(Collectors.toList());
 		// 必要情報のみ取り出す
 		List<Ticket> ticketList = new ArrayList<>();
@@ -112,6 +115,8 @@ public class JasperReportController {
 			parameterMap.put("datasource1", ticketList);
 			parameterMap.put("customerName", customerName);
 			parameterMap.put("outputDate", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+			parameterMap.put("startDate", searchForm.getStartDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+			parameterMap.put("endDate", searchForm.getEndDate().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")));
 			// PDFを作成し、レスポンスボディに設定
 			JasperPrint print = JasperFillManager.fillReport(stream, parameterMap, new JREmptyDataSource());
 			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
