@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.taskadapter.redmineapi.bean.Issue;
 import com.taskadapter.redmineapi.bean.User;
@@ -59,9 +60,12 @@ public class Ticket implements Serializable {
 			for (String id : issue.getCustomFieldByName("副担当者").getValues()) {
 				if (i != 0) {
 					sb.append("\n");
+				}
+				Optional<User> op = userList.stream().filter(u -> Objects.equals(u.getId(), Integer.valueOf(id))).findFirst();
+				if (op.isPresent()) {
+					sb.append(op.get().getLastName());
 					i++;
 				}
-				sb.append(userList.stream().filter(u -> Objects.equals(u.getId(), Integer.valueOf(id))).findFirst().get().getLastName());
 			}
 			this.subAssigneeName = sb.toString();
 		}
