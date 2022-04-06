@@ -45,6 +45,22 @@
 					<span class="alert alert-danger mb-0" th:if="${#fields.hasErrors('dateValid')}" th:errors="*{dateValid}">dateValidのエラーメッセージ<br></span>
 					<span id="dateOrderError" class="alert alert-danger mb-0" style="display: none;">終了日は開始日よりも後の日付を入力してください。<br></span>
 				</label>
+				<!-- チケットのステータス（状況） -->
+				<h5 class="font-weight-bold m-0">チケットのステータス（状況）</h5>
+				<label class="form-group mb-2 d-flex flex-column" for="issueStatus">
+					<div class="d-flex justify-content-between align-items-center">
+						<div class="col-2"></div>
+						<div class="d-flex flex-wrap col-10 p-0">
+							<div th:each="is : ${issueStatusList}" class="custom-control custom-checkbox  custom-control-inline" style="min-width: 100px;">
+								<input type="checkbox" class="custom-control-input" name="issueStatus" th:id="|issueStatus${is.id}|"
+										th:value="${is.id}" th:field="*{issueStatus}">
+								<label class="custom-control-label" th:for="|issueStatus${is.id}|" th:text="${is.name}"></label>
+							</div>
+						</div>
+					</div>
+					<!-- チケットのステータス（状況） エラー文 -->
+					<span id="issueStatusSpringError" class="alert alert-danger mb-0" th:if="${#fields.hasErrors('issueStatus')}" th:errors="*{issueStatus}">issueStatusのエラーメッセージ<br></span>
+				</label>
 <!--/*-->
 				<!-- プロジェクトID -->
 				<h5 class="font-weight-bold m-0">プロジェクトID</h5>
