@@ -70,25 +70,30 @@ public class MainController {
 	 */
 	@RequestMapping(value = "search", method = RequestMethod.GET)
 	String showSearchView(Model model, SearchForm searchForm) {
-		// プロジェクト一覧を取得
+		// プロジェクトリスト、チケットステータスリストを取得
 		List<Project> projectList = new ArrayList<>();
-		List<Project> parentProjectList = new ArrayList<>();
-		List<Project> childProjectList = new ArrayList<>();
-		List<IssueStatus> issueStatusList = new ArrayList<>();	// チケットステータスリスト
+		List<IssueStatus> issueStatusList = new ArrayList<>();
 		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
 		try {
 			projectList = redmineManager.getProjectManager().getProjects();
-			parentProjectList = projectList.stream()
-					.filter(p -> Objects.isNull(p.getParentId()))
-					.collect(Collectors.toList());
-			childProjectList = projectList.stream()
-					.filter(p -> Objects.nonNull(p.getParentId()))
-					.filter(p -> Objects.equals(p.getName().substring(p.getName().length() - 5), "_検討課題"))
-					.collect(Collectors.toList());
 			issueStatusList = redmineManager.getIssueManager().getStatuses();
 		} catch (RedmineException e) {
 			e.printStackTrace();
 		}
+		// 検討課題プロジェクトだけのリストを作成
+		List<Project> childProjectList = projectList.stream()
+				.filter(p -> Objects.nonNull(p.getParentId()))
+				.filter(p -> Objects.equals(p.getName().substring(p.getName().length() - 5), "_検討課題"))
+				.collect(Collectors.toList());
+		// parentIdのみのリストを作成(filter用)
+		List<Integer> parentIdList = childProjectList.stream()
+				.map(cp -> cp.getParentId())
+				.collect(Collectors.toList());
+		// 検討課題プロジェクトの親プロジェクトだけのリストを作成
+		List<Project> parentProjectList = projectList.stream()
+				.filter(p -> Objects.isNull(p.getParentId()))
+				.filter(p -> parentIdList.contains(p.getId()))
+				.collect(Collectors.toList());
 		// 出力画面用にセット
 		model.addAttribute("parentProjectList", parentProjectList);
 		model.addAttribute("childProjectList", childProjectList);
