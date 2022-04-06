@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.RedmineManagerFactory;
+import com.taskadapter.redmineapi.bean.IssueStatus;
 import com.taskadapter.redmineapi.bean.Project;
 
 import redmineissuesoutput.app.form.SearchForm;
@@ -63,16 +64,17 @@ public class MainController {
 	/**
 	 * 検索画面を表示。
 	 *
-	 * @param searchForm : SearchForm
 	 * @param model : Model
+	 * @param searchForm : SearchForm
 	 * @return search.htmlの階層
 	 */
 	@RequestMapping(value = "search", method = RequestMethod.GET)
-	String showSearchView(Model model) {
+	String showSearchView(Model model, SearchForm searchForm) {
 		// プロジェクト一覧を取得
 		List<Project> projectList = new ArrayList<>();
 		List<Project> parentProjectList = new ArrayList<>();
 		List<Project> childProjectList = new ArrayList<>();
+		List<IssueStatus> issueStatusList = new ArrayList<>();	// チケットステータスリスト
 		RedmineManager redmineManager = RedmineManagerFactory.createWithApiKey(redmineInfo.getUrl(), redmineInfo.getApiKey());
 		try {
 			projectList = redmineManager.getProjectManager().getProjects();
@@ -83,13 +85,20 @@ public class MainController {
 					.filter(p -> Objects.nonNull(p.getParentId()))
 					.filter(p -> Objects.equals(p.getName().substring(p.getName().length() - 5), "_検討課題"))
 					.collect(Collectors.toList());
+			issueStatusList = redmineManager.getIssueManager().getStatuses();
 		} catch (RedmineException e) {
 			e.printStackTrace();
 		}
 		// 出力画面用にセット
 		model.addAttribute("parentProjectList", parentProjectList);
 		model.addAttribute("childProjectList", childProjectList);
-		
+		model.addAttribute("issueStatusList", issueStatusList);
+		// IssueStatusリストをidのみのリストに変換
+		List<Integer> issueStatusIdList = issueStatusList.stream()
+				.map(is -> is.getId())
+				.collect(Collectors.toList());
+		// listから配列に変換し、フォームにセット
+		searchForm.setIssueStatus(issueStatusIdList.toArray(new Integer[issueStatusIdList.size()]));
 		return "search";
 	}
 	
