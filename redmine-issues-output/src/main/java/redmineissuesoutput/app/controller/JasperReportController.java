@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -90,11 +91,17 @@ public class JasperReportController {
 		}
 		// チケットをフィルタリング
 		List<Issue> filteredIssueList = allIssueList.stream()
+				// フィルタ：出力したいチケットのステータスに該当する
+				.filter(i -> Arrays.asList(searchForm.getIssueStatus()).contains(i.getStatusId()))
+				// フィルタ：発生日が入力されている
 				.filter(i -> !i.getCustomFieldByName("発生日").getValue().isEmpty())
+				// フィルタ：発生日が範囲内（開始条件）
 				.filter(i -> searchForm.getStartDate().minusDays(1)
-								.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+						.isBefore(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+				// フィルタ：発生日が範囲内（終了条件）
 				.filter(i -> searchForm.getEndDate().plusDays(1)
-								.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+						.isAfter(LocalDate.parse(i.getCustomFieldByName("発生日").getValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+				// 並替：1.発生日昇順、2.管理番号昇順(nullは最後)
 				.sorted(Comparator.comparing((Issue i) -> i.getCustomFieldByName("発生日").getValue())
 						.thenComparing((Issue i) -> StringUtils.isBlank(i.getCustomFieldByName("管理番号").getValue()) ? null
 								: Integer.valueOf(i.getCustomFieldByName("管理番号").getValue()),
