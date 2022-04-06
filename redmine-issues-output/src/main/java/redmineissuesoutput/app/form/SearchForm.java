@@ -40,6 +40,8 @@ public class SearchForm implements Serializable {
 		return endDate.isAfter(startDate);
 	}
 	
+	private Integer[] issueStatus;				// チケットのステータス
+	
 //	@NotNull(message = "プロジェクトID：必須項目です")
 //	public String projectId;					// プロジェクトID
 //	
