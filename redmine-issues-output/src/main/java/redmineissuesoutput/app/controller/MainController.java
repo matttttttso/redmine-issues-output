@@ -11,9 +11,9 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
@@ -56,7 +56,7 @@ public class MainController {
 	 *
 	 * @return リダイレクト(/search)
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	String moveSearchView(Model model) {
 		return "redirect:/search";
 	}
@@ -68,7 +68,7 @@ public class MainController {
 	 * @param searchForm : SearchForm
 	 * @return search.htmlの階層
 	 */
-	@RequestMapping(value = "search", method = RequestMethod.GET)
+	@GetMapping("search")
 	String showSearchView(Model model, SearchForm searchForm) {
 		// プロジェクトリスト、チケットステータスリストを取得
 		List<Project> projectList = new ArrayList<>();
