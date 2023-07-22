@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,7 +50,7 @@ public class JasperReportController {
 	@Autowired
 	private RedmineInfo redmineInfo;
 
-	@RequestMapping(value = "output", method = RequestMethod.POST)
+	@PostMapping("output")
 	public void showTicketList(Model model, @RequestParam("projectIdAndParentName") String projectIdAndParentName,
 			SearchForm searchForm, HttpServletResponse response) {
 		// リクエストパラメータ加工
